@@ -1,13 +1,12 @@
 import React, { ReactNode } from 'react';
 import Link from 'next/link';
-import Head from 'next/head';
 
 type Props = {
   children: ReactNode;
   title?: string;
 };
 
-const Layout = ({ children }: Props) => (
+const Header = ({ children }: Props) => (
   <div>
     <header>
       <nav>
@@ -28,4 +27,4 @@ const Layout = ({ children }: Props) => (
   </div>
 );
 
-export default Layout;
+export default Header;

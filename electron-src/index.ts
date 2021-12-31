@@ -7,6 +7,7 @@ import { BrowserWindow, app, ipcMain, IpcMainEvent, session } from 'electron';
 import isDev from 'electron-is-dev';
 import prepareNext from 'electron-next';
 import os from 'os';
+import fs from 'fs';
 
 require('electron-reload')(__dirname, {
   electron: require('${__dirname}/../../node_modules/electron'),
@@ -23,14 +24,17 @@ app.on('ready', async () => {
   await session.defaultSession.loadExtension(reactDevToolsPath);
 
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    show: false,
+    useContentSize: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: false,
       preload: join(__dirname, 'preload.js'),
     },
   });
+
+  mainWindow.maximize();
+  mainWindow.show();
 
   const url = isDev
     ? 'http://localhost:8000/'
@@ -41,6 +45,12 @@ app.on('ready', async () => {
       });
 
   mainWindow.loadURL(url);
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.insertCSS(
+      fs.readFileSync(join(__dirname, '../renderer/style/style.css'), 'utf8'),
+    );
+  });
 });
 
 // Quit the app once all windows are closed

@@ -1,6 +1,10 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '../components/Layout';
+import Wrapper from '../components/Wrapper';
+import Header from '../components/Header';
+
+import styled from 'styled-components';
 
 const IndexPage = () => {
   useEffect(() => {
@@ -15,16 +19,28 @@ const IndexPage = () => {
   };
 
   return (
-    <Layout title='Home | Next.js + TypeScript + Electron Example'>
-      <h1>Hello Next.js 👋</h1>
-      <button onClick={onSayHiClick}>Say hi to electron</button>
-      <p>
-        <Link href='/about'>
-          <a>About</a>
-        </Link>
-      </p>
-    </Layout>
+    <Wrapper title='notebook'>
+      <Background>
+        <Header title='sample'>
+          <p>Hello</p>
+        </Header>
+        <Layout>
+          <p>
+            <Link href='/about'>
+              <a>About</a>
+            </Link>
+          </p>
+        </Layout>
+      </Background>
+    </Wrapper>
   );
 };
+
+const Background = styled.div`
+  background-color: #f5f5f5;
+  overscroll-behavior: none;
+  width: 100%;
+  height: 100%;
+`;
 
 export default IndexPage;
