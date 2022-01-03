@@ -1,30 +1,20 @@
 import React, { ReactNode } from 'react';
-import Link from 'next/link';
+import styled from 'styled-components';
 
 type Props = {
   children: ReactNode;
   title?: string;
 };
 
-const Header = ({ children }: Props) => (
-  <div>
-    <header>
-      <nav>
-        <Link href='/'>
-          <a>Home</a>
-        </Link>{' '}
-        |{' '}
-        <Link href='/about'>
-          <a>About</a>
-        </Link>{' '}
-        |{' '}
-        <Link href='/initial-props'>
-          <a>With Initial Props</a>
-        </Link>
-      </nav>
-    </header>
-    {children}
-  </div>
-);
+const Header = ({ children }: Props) => {
+  return <StyledHeader>{children}</StyledHeader>;
+};
+
+const StyledHeader = styled.header`
+  position: fixed;
+  width: 100%;
+  height: 5%;
+  background-color: #ffffff;
+`;
 
 export default Header;
