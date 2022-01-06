@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import Link from 'next/link';
@@ -6,9 +6,11 @@ import Layout from '../components/Layout';
 import Wrapper from '../components/Wrapper';
 import Header from '../components/Header';
 import Page from '../components/Page';
-import PageWrapper from '../components/PageWrapper';
+import PageList from '../components/PageList';
 
 const IndexPage = () => {
+  const [pageCount, setPageCount] = useState(4);
+
   useEffect(() => {
     // add a listener to 'message' channel
     global.ipcRenderer.addListener('message', (_event, args) => {
@@ -31,12 +33,7 @@ const IndexPage = () => {
             </Link>
           </p>
         </Layout> */}
-        <PageWrapper>
-          <Page />
-          <Page />
-          <Page />
-          <Page />
-        </PageWrapper>
+        <PageList pageCount={pageCount} />
       </Background>
     </Wrapper>
   );
