@@ -1,4 +1,4 @@
 export type Page = {
   id: number;
-  isFocused: boolean;
+  isCurrentPage: boolean;
 };
