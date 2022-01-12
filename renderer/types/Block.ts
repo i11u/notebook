@@ -1,4 +1,5 @@
 import { Style, FontFamily } from '../config/config';
+import { Page } from './Page';
 
 type Block = {
   blockId: number;
@@ -13,7 +14,7 @@ export type TextBlock = Block & {
   subBlocks: TextBlock[] | null;
 };
 
-export const createBlock = (): TextBlock => {
+export const createTextBlock = (page: Page): void => {
   const block: TextBlock = {
     blockId: 1,
     parentPageId: 1,
@@ -23,7 +24,7 @@ export const createBlock = (): TextBlock => {
     style: 'Plain',
     subBlocks: [],
   };
-  return block;
+  page.blocks.push(block);
 };
 
 export default Block;
