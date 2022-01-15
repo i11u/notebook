@@ -6,8 +6,14 @@ type Block = {
   parentPageId: number;
 };
 
+type IndexInBlock = {
+  x: number;
+  y: number;
+};
+
 export type TextBlock = Block & {
   text: string;
+  index: IndexInBlock;
   gridScale: number;
   font: FontFamily;
   fontSize: number;
@@ -20,6 +26,7 @@ export const createTextBlock = (page: Page): void => {
     blockId: 1,
     parentPageId: 1,
     text: '',
+    index: { x: 0, y: 0 },
     gridScale: 1,
     font: 'SF Mono',
     fontSize: 14,
