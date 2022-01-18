@@ -1,19 +1,19 @@
 import { Style, FontFamily } from '../config/config';
 import { Page } from './Page';
 
-type Block = {
+export type Block = {
   blockId: number;
   parentPageId: number;
 };
 
-type IndexInBlock = {
+export type IndexInSideBlock = {
   x: number;
   y: number;
 };
 
 export type TextBlock = Block & {
   text: string;
-  index: IndexInBlock;
+  index: IndexInSideBlock;
   gridScale: number;
   font: FontFamily;
   fontSize: number;
