@@ -13,15 +13,51 @@ require('electron-reload')(__dirname, {
   electron: require('${__dirname}/../../node_modules/electron'),
 });
 
-const reactDevToolsPath = join(
-  os.homedir(),
-  '/Library/Application Support/Google/Chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/4.22.0_0',
-);
+/* 
+  Return true when a is more latest version than b.
+  Version is formatted e.g. "4.23.0_0"
+*/
+const compareVersion = (a: string, b: string): boolean => {
+  if (a === b) {
+    return true;
+  }
+
+  // separators include "." and "_"
+  const aUnits = a.split(/.|_/);
+  const bUnits = b.split(/.|_/);
+
+  const len = Math.min(aUnits.length, bUnits.length);
+
+  for (var i = 0; i < len; i++) {
+    if (parseInt(aUnits[i]) > parseInt(bUnits[i])) return true;
+    if (parseInt(aUnits[i]) < parseInt(bUnits[i])) return false;
+  }
+
+  // if unit elements are the same, choose the one with more units
+  if (aUnits.length > bUnits.length) return true;
+  if (aUnits.length < bUnits.length) return false;
+
+  return true;
+};
+
+const reactDevToolsPath = () => {
+  const dirPath = join(
+    os.homedir(),
+    '/Library/Application Support/Google/Chrome/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/',
+  );
+  const versions = fs.readdirSync(dirPath);
+  return join(
+    dirPath,
+    Array.from(versions).reduce((accumulator, currentValue) => {
+      return compareVersion(accumulator, currentValue) ? accumulator : currentValue;
+    }),
+  );
+};
 
 // Prepare the renderer once the app is ready
 app.on('ready', async () => {
   await prepareNext('./renderer');
-  await session.defaultSession.loadExtension(reactDevToolsPath);
+  await session.defaultSession.loadExtension(reactDevToolsPath());
 
   const mainWindow = new BrowserWindow({
     show: false,
