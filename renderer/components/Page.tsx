@@ -1,15 +1,25 @@
 import styled from 'styled-components';
 
 const Page = () => {
-  return <StyledCanvas />;
+  return (
+    <PageWrapper>
+      <StyledPage />
+    </PageWrapper>
+  );
 };
 
-const StyledCanvas = styled.canvas`
-  width: 500px;
-  height: 360px;
-  background-color: #ffffff;
-  margin-left: 50%;
+const PageWrapper = styled.div`
+  width: 540px;
+  justify-content: center;
+  margin-left: 50vw;
+  margin-top: calc(50vh - 382.05px);
   transform: translateX(-50%);
+`;
+
+const StyledPage = styled.canvas`
+  width: 540px;
+  height: 764.1px;
+  background-color: #ffffff;
 `;
 
 export default Page;

@@ -1,4 +1,4 @@
-import { Style, FontFamily } from '../config/config';
+import { FontFamily, Style } from '../constants/Character';
 import { Page } from './Page';
 
 export type Block = {

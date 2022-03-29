@@ -3,7 +3,7 @@ import { join } from 'path';
 import { format } from 'url';
 
 // Packages
-import { BrowserWindow, app, ipcMain, IpcMainEvent, session } from 'electron';
+import { app, BrowserWindow, ipcMain, IpcMainEvent, session } from 'electron';
 import isDev from 'electron-is-dev';
 import prepareNext from 'electron-next';
 import os from 'os';
@@ -29,15 +29,13 @@ const compareVersion = (a: string, b: string): boolean => {
   const len = Math.min(aUnits.length, bUnits.length);
 
   for (var i = 0; i < len; i++) {
-    if (parseInt(aUnits[i]) > parseInt(bUnits[i])) return true;
+    if (parseInt(aUnits[i]) >= parseInt(bUnits[i])) return true;
     if (parseInt(aUnits[i]) < parseInt(bUnits[i])) return false;
   }
 
   // if unit elements are the same, choose the one with more units
-  if (aUnits.length > bUnits.length) return true;
-  if (aUnits.length < bUnits.length) return false;
-
-  return true;
+  if (aUnits.length >= bUnits.length) return true;
+  return aUnits.length >= bUnits.length;
 };
 
 const reactDevToolsPath = () => {

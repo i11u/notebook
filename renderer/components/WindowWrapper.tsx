@@ -6,7 +6,7 @@ type Props = {
   title?: string;
 };
 
-const Wrapper = ({ children, title }: Props) => {
+const WindowWrapper = ({ children, title }: Props) => {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <Head>
@@ -19,4 +19,4 @@ const Wrapper = ({ children, title }: Props) => {
   );
 };
 
-export default Wrapper;
+export default WindowWrapper;
