@@ -21,7 +21,7 @@ const StyledPage = styled.div`
   margin-left: 50vw;
   margin-top: calc(50vh - ${PAGE_HEIGHT / 2}px);
   transform: translateX(-50%);
-  box-shadow: 5px 5px 5px darkgrey;
+  box-shadow: 5px 5px 10px darkgrey, -1px 0 10px darkgrey;
 `;
 
 export default Page;

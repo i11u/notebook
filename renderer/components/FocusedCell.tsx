@@ -102,6 +102,39 @@ const FocusedCell = ({
     focus.style.width = cellLength + 'px';
   };
 
+  const handleOnKeyDown = (e) => {
+    const key = e.keyCode || e.charCode;
+    const current = getCurrentFocusPosition();
+    switch (key) {
+      case 37: // ArrowLeft
+        console.log('left');
+        if (current.col > 0) {
+          setFocusedPosition({ row: current.row, col: current.col - 1 });
+        }
+        break;
+      case 38: // ArrowUp
+        console.log('up');
+        if (current.row > 0) {
+          setFocusedPosition({ row: current.row - 1, col: current.col });
+        }
+        break;
+      case 39: // ArrowRight
+        console.log('right');
+        if (current.col < maxCol - 1) {
+          setFocusedPosition({ row: current.row, col: current.col + 1 });
+        }
+        break;
+      case 40: // ArrowDown
+        console.log('down');
+        if (current.row < maxRow - 1) {
+          setFocusedPosition({ row: current.row + 1, col: current.col });
+        }
+        break;
+      default:
+        return;
+    }
+  };
+
   // Change focus position visually, responding to the change of 'focusedPosition'
   useEffect(() => {
     const focusedCell = document.getElementById('focused-cell');
@@ -130,6 +163,7 @@ const FocusedCell = ({
           cellLength: cellLength - 1,
         }}
         onKeyUp={(e) => handleOnKeyUp(e)}
+        onKeyDown={(e) => handleOnKeyDown(e)}
         contentEditable='true'
       />
     </>
