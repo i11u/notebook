@@ -1,12 +1,11 @@
 import Head from 'next/head';
-import { ReactNode } from 'react';
 
 type Props = {
-  children: ReactNode;
+  children: any;
   title?: string;
 };
 
-const WindowWrapper = ({ children, title }: Props) => {
+const DocumentWrapper = ({ children, title }: Props) => {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <Head>
@@ -19,4 +18,4 @@ const WindowWrapper = ({ children, title }: Props) => {
   );
 };
 
-export default WindowWrapper;
+export default DocumentWrapper;

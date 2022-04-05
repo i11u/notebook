@@ -16,11 +16,13 @@
     "fmt": "prettier --write --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json,css}'"
   },
   "dependencies": {
+    "@use-gesture/react": "^10.2.10",
     "electron-is-dev": "^1.1.0",
     "electron-next": "^3.1.5",
     "eslint-config-next": "^12.0.10",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-spring": "^9.4.4",
     "styled-components": "^5.3.3"
   },
   "devDependencies": {

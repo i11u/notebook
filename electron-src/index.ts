@@ -70,6 +70,8 @@ app.on('ready', async () => {
   mainWindow.maximize();
   mainWindow.show();
 
+  mainWindow.webContents.setVisualZoomLevelLimits(1, 4);
+
   const url = isDev
     ? 'http://localhost:8000/'
     : format({

@@ -13,12 +13,18 @@ const PageList = ({ pageCount }: Props) => {
         (() => {
           const items = [];
           for (let i = 0; i < pageCount; i++) {
-            items.push(<Page />);
+            items.push(
+              <Page>
+                <></>
+              </Page>,
+            );
           }
           return <div>{items}</div>;
         })()
       ) : (
-        <Page />
+        <Page>
+          <></>
+        </Page>
       )}
     </StyledPageList>
   );
