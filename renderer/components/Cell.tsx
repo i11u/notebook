@@ -6,7 +6,7 @@ import React from 'react';
 const StyledCell = styled.textarea`
   width: ${({ props }) => props.cellLength}px;
   height: ${({ props }) => props.cellLength}px;
-  font-size: ${({ props }) => props.cellLength}px;
+  font-size: ${({ props }) => props.cellLength - 2}px;
   outline: none;
   text-align: center;
   padding: 1px 0 0 0;

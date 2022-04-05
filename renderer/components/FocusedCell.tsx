@@ -2,19 +2,23 @@ import styled from 'styled-components';
 import { Position } from '../pages';
 import { useEffect, useState } from 'react';
 
-const StyledFocusedCell = styled.textarea`
+const StyledFocusedCell = styled.div`
   width: ${({ props }) => props.cellLength}px;
-  height: ${({ props }) => props.cellLength - 1}px;
+  height: ${({ props }) => props.cellLength}px;
   font-size: ${({ props }) => props.cellLength}px;
   text-align: center;
-  padding: 1px 0 0 0;
   outline: none;
   margin: -1px 0 0 -1px;
   border: 2px solid gray;
   opacity: 0.5;
+
+  background-color: white;
   border-radius: 3px;
   position: absolute;
   resize: none;
+  z-index: 0;
+  line-height: 1;
+  white-space: nowrap;
 `;
 
 StyledFocusedCell.defaultProps = {
@@ -64,16 +68,21 @@ const FocusedCell = ({
     // When there is no input value, do nothing
     // When BackSpace is pressed, do nothing
     const elem = e.target;
+    const focus = document.getElementById('focused-cell');
     const key = e.keyCode || e.charCode;
-    if (!elem.value || key == 8 || key == 46 || isComposing) return;
+    if (elem.textContent.length >= 1) {
+      focus.style.width = cellLength * elem.textContent.length + 'px';
+    }
+    if (!elem.textContent || key == 8 || key == 46 || isComposing) return;
 
     // Move the focused cell to the next position
     let current = getCurrentFocusPosition();
-    const inputLength = elem.value.length;
+    const inputLength = elem.textContent.length;
     let next = getNextPosition(current, inputLength);
     if (next === undefined) {
       alert();
-      elem.value = '';
+      elem.textContent = '';
+      focus.style.width = cellLength + 'px';
       return;
     }
     setFocusedPosition(next);
@@ -84,11 +93,13 @@ const FocusedCell = ({
       const target = document.getElementById(
         `cell-${current.row}-${current.col}`,
       ) as HTMLInputElement;
-      target.value = elem.value[i];
+
+      target.value = elem.textContent[i];
       current = getNextPosition(current, 1);
     }
     // Reset the focused cell value
-    elem.value = '';
+    elem.textContent = '';
+    focus.style.width = cellLength + 'px';
   };
 
   // Change focus position visually, responding to the change of 'focusedPosition'
@@ -112,11 +123,16 @@ const FocusedCell = ({
   }, [cellLength, focusedPosition]);
 
   return (
-    <StyledFocusedCell
-      id='focused-cell'
-      props={{ cellLength: cellLength - 1 }}
-      onKeyUp={(e) => handleOnKeyUp(e)}
-    />
+    <>
+      <StyledFocusedCell
+        id='focused-cell'
+        props={{
+          cellLength: cellLength - 1,
+        }}
+        onKeyUp={(e) => handleOnKeyUp(e)}
+        contentEditable='true'
+      />
+    </>
   );
 };
 
