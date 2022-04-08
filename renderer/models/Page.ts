@@ -15,3 +15,8 @@ export const createPage = (document: Document): void => {
   };
   document.pages.push(page);
 };
+
+export type Position = {
+  row: number;
+  col: number;
+};

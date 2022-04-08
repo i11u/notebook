@@ -43,6 +43,7 @@
     "eslint-plugin-react": "^7.28.0",
     "next": "^12.0.10",
     "prettier": "^2.5.1",
+    "react-use": "^17.3.2",
     "rimraf": "^3.0.0",
     "typescript": "^4.0.5"
   },

@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { PAGE_HEIGHT } from './Page';
-import { Position } from '../pages';
+import { Position } from '../models/Page';
 import React from 'react';
 
 const StyledCell = styled.textarea`
@@ -22,37 +22,63 @@ StyledCell.defaultProps = {
 };
 
 type Props = {
-  maxRowIdx: number;
-  maxColIdx: number;
-  rowIdx: number;
-  colIdx: number;
-  setFocusedPosition: (Position) => void;
+  maxRow: number;
+  maxCol: number;
+  row: number;
+  col: number;
+  setCursorPosition: (Position) => void;
+  isDrawing: boolean;
+  mouseIsPressed: boolean;
+  setMouseIsPressed: (boolean) => void;
 };
 
-const handleOnClick = (row, col, setFocusedPosition) => {
-  const newPosition: Position = { row: row, col: col };
-  setFocusedPosition(newPosition);
-};
+const Cell = ({
+  maxRow,
+  maxCol,
+  row,
+  col,
+  setCursorPosition,
+  isDrawing,
+  mouseIsPressed,
+  setMouseIsPressed,
+}: Props) => {
+  const isLastRow = row == maxRow - 1;
+  const isLastCol = col == maxCol - 1;
+  const cellLength = PAGE_HEIGHT / maxRow - 1;
 
-const Cell = ({ maxRowIdx, maxColIdx, rowIdx, colIdx, setFocusedPosition }: Props) => {
-  const isLastRow = rowIdx == maxRowIdx - 1;
-  const isLastCol = colIdx == maxColIdx - 1;
-  let style = {
-    borderTop: `1px solid lightgrey`,
-    borderLeft: `1px solid lightgrey`,
+  const getBorderStyle = () => {
+    let style = {
+      borderTop: `1px solid lightgrey`,
+      borderLeft: `1px solid lightgrey`,
+    };
+    if (isLastRow) style['borderBottom'] = `1px solid lightgrey`;
+    if (isLastCol) style['borderRight'] = `1px solid lightgrey`;
+    return style;
   };
-  if (isLastRow) style['borderBottom'] = `1px solid lightgrey`;
-  if (isLastCol) style['borderRight'] = `1px solid lightgrey`;
 
-  const cellLength = PAGE_HEIGHT / maxRowIdx - 1;
+  const handleOnMouseDown = (row, col, setCursorPosition) => {
+    const newPosition: Position = { row: row, col: col };
+    setCursorPosition(newPosition);
+  };
+
+  const handleOnMouseOver = (row, col, setCursorPosition) => {
+    if (!isDrawing || !mouseIsPressed) return;
+    const newPosition: Position = { row: row, col: col };
+    setCursorPosition(newPosition);
+    const current = document.getElementById(`cell-${row}-${col}`) as HTMLInputElement;
+    if (current.style.backgroundColor != 'black') {
+      current.style.backgroundColor = 'black';
+    }
+  };
 
   return (
     <StyledCell
-      id={`cell-${rowIdx}-${colIdx}`}
+      id={`cell-${row}-${col}`}
       type='text'
       props={{ cellLength: cellLength }}
-      style={style}
-      onClick={(e) => handleOnClick(rowIdx, colIdx, setFocusedPosition)}
+      style={getBorderStyle()}
+      onMouseDown={(e) => handleOnMouseDown(row, col, setCursorPosition)}
+      onMouseOver={() => handleOnMouseOver(row, col, setCursorPosition)}
       readOnly
     />
   );
