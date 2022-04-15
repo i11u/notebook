@@ -1,5 +1,6 @@
 import { Position } from '../models/Page';
 import { PAGE_HEIGHT, PAGE_WIDTH } from '../components/Page';
+import { TextBlock } from '../models/Block';
 
 export const getMaxCol = (maxRow) => {
   return PAGE_WIDTH / (PAGE_HEIGHT / maxRow);
@@ -31,6 +32,7 @@ export const makeAlert = (msg: string) => {
 };
 
 export const isEmpty = (cell: HTMLTextAreaElement) => {
+  if (!cell) return true;
   return cell.value.length === 0;
 };
 
@@ -39,7 +41,22 @@ export const getCurrentCursorPosition = (cursorPosition: Position): Position => 
 };
 
 // Get next cursor when you "Enter"
-export const getNextCursorPosition = (current: Position, inputLength: number, maxRow, maxCol) => {
+export const getNextCursorPositionInBlock = (
+  current: Position,
+  inputLength: number,
+  maxRow: number,
+  maxCol: number,
+  block: TextBlock,
+) => {
+  return { row: current.row + 1, col: block.position.col };
+};
+
+export const getNextCursorPosition = (
+  current: Position,
+  inputLength: number,
+  maxRow: number,
+  maxCol: number,
+) => {
   if (current.col + inputLength > maxCol - 1) {
     return undefined;
   } else {
@@ -64,4 +81,13 @@ export const turnCellColorBlack = (cell: HTMLTextAreaElement) => {
 
 export const getCell = (row: number, col: number) => {
   return document.getElementById(`cell-${row}-${col}`) as HTMLTextAreaElement;
+};
+
+export const getCellFromPos = (pos: Position) => {
+  if (!pos) return undefined;
+  return document.getElementById(`cell-${pos.row}-${pos.col}`) as HTMLTextAreaElement;
+};
+
+export const deepCopy = <T>(array: T[]) => {
+  return array.map((item) => item);
 };

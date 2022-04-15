@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react';
 import { Position } from '../models/Page';
 import {
   getCell,
+  getCellFromPos,
   getCurrentCursorPosition,
   getKeyCode,
   getNextCursorPosition,
+  getNextCursorPositionInBlock,
   getPreviousCursorPosition,
   isEmpty,
   makeAlert,
 } from '../utils/util';
+import { createTextBlock, isInTextBlock, TextBlock } from '../models/Block';
 
 const StyledCursor = styled.div`
   width: ${({ props }) => props.cellLength}px;
@@ -45,6 +48,10 @@ type Props = {
   isDrawing: boolean;
   mouseIsPressed: boolean;
   setMouseIsPressed: (boolean) => void;
+  textBlocks: TextBlock[];
+  setTextBlocks: (blocks: TextBlock[]) => void;
+  currentBlock: TextBlock;
+  setCurrentBlock: (TextBlock) => void;
 };
 
 const Cursor = ({
@@ -56,8 +63,13 @@ const Cursor = ({
   isDrawing,
   mouseIsPressed,
   setMouseIsPressed,
+  textBlocks,
+  setTextBlocks,
+  currentBlock,
+  setCurrentBlock,
 }: Props) => {
-  const [isComposing, setIsComposing] = useState(false);
+  const [isComposing, setIsComposing] = useState<boolean>(false);
+  const [count, setCount] = useState<number>(0);
 
   const handleOnKeyUp = (e) => {
     const cursor = document.getElementById('cursor');
@@ -70,10 +82,123 @@ const Cursor = ({
 
     // When there is no input value, BackSpace or Delete is pressed,
     // or user hasn't ENTER the text, do nothing
-    if (!cursor.textContent.length || key == 8 || key == 46 || isComposing) return;
+    if (isComposing) return;
 
-    // Move cursor to the next position
+    // When ENTER is pressed inside TextBlock, move to new line in the TextBlock
     const current = getCurrentCursorPosition(cursorPosition);
+    if (!cursor.textContent && key === 13 && currentBlock) {
+      const next = getNextCursorPositionInBlock(
+        current,
+        cursor.textContent.length,
+        maxRow,
+        maxCol,
+        currentBlock,
+      );
+      // Move cursor to the next line in Block
+      setCursorPosition(next);
+
+      // Update block size
+      console.log('fire!');
+      setTextBlocks(
+        textBlocks.map((block) =>
+          block.blockId === currentBlock.blockId
+            ? createTextBlock(
+                block.blockId,
+                block.position,
+                block.width,
+                block.height + 1,
+                block.text + cursor.textContent,
+                null,
+                null,
+                cellLength,
+              )
+            : block,
+        ),
+      );
+      setCurrentBlock((prev) => {
+        return {
+          ...prev,
+          height: prev.height + 1,
+          text: prev.text + cursor.textContent,
+        };
+      });
+
+      // Reset the focused cell value
+      cursor.textContent = '';
+      return;
+    }
+
+    // Generate TextBlock
+    if (cursor.textContent) {
+      const previous = getPreviousCursorPosition(current);
+      const previousCell = getCellFromPos(previous);
+      if (isEmpty(previousCell) && currentBlock === null) {
+        const newBlock = createTextBlock(
+          count,
+          cursorPosition,
+          cursor.textContent.length,
+          1,
+          cursor.textContent,
+          null,
+          null,
+          cellLength,
+        );
+        setTextBlocks([...textBlocks, newBlock]);
+        setCount((count) => count + 1);
+        setCurrentBlock(newBlock);
+      } else if (isEmpty(previousCell) && currentBlock != null) {
+        // Update block size
+        setTextBlocks(
+          textBlocks.map((block, index) =>
+            block.blockId === currentBlock.blockId
+              ? createTextBlock(
+                  block.blockId,
+                  block.position,
+                  block.width,
+                  block.height,
+                  block.text + cursor.textContent,
+                  null,
+                  null,
+                  cellLength,
+                )
+              : block,
+          ),
+        );
+        setCurrentBlock((prev) => {
+          return {
+            ...prev,
+            text: prev.text + cursor.textContent,
+          };
+        });
+      } else if (!isEmpty(previousCell) && currentBlock === null) {
+        // should not happen
+      } /* !isEmpty(previousCell) && currentBlockId != null */ else {
+        setTextBlocks(
+          textBlocks.map((block, index) =>
+            block.blockId === currentBlock.blockId
+              ? createTextBlock(
+                  block.blockId,
+                  block.position,
+                  block.width + cursor.textContent.length,
+                  block.height,
+                  block.text + cursor.textContent,
+                  null,
+                  null,
+                  cellLength,
+                )
+              : block,
+          ),
+        );
+        setCurrentBlock((prev) => {
+          return {
+            ...prev,
+            width: prev.width + cursor.textContent.length,
+            text: prev.text + cursor.textContent,
+          };
+        });
+      }
+    }
+
     const next = getNextCursorPosition(current, cursor.textContent.length, maxRow, maxCol);
 
     // When next is undefined, clear the text
@@ -173,7 +298,13 @@ const Cursor = ({
     cursor.style.top = row * cellLength + 'px';
     cursor.style.left = col * cellLength + 'px';
     cursor.focus();
+    if (!isInTextBlock(textBlocks, cursorPosition)) setCurrentBlock(null);
   }, [cellLength, cursorPosition]);
+
+  useEffect(() => {
+    console.log(textBlocks);
+    console.log(currentBlock);
+  }, [textBlocks, currentBlock]);
 
   return (
     <>

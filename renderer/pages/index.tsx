@@ -16,7 +16,8 @@ import {
   isEmpty,
   turnCellColorBlack,
 } from '../utils/util';
-import Block from '../models/Block';
+import { getNextTextBlock, TextBlock } from '../models/Block';
+import BlockCursor from '../components/BlockCursor';
 
 const IndexPage = () => {
   // const [maxRow, setMaxRow] = useState(63);
@@ -28,13 +29,59 @@ const IndexPage = () => {
     row: 0,
     col: 0,
   });
+  const [blockCursorPosition, setBlockCursorPosition] = useState<Position>({
+    row: 0,
+    col: 0,
+  });
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [mouseIsPressed, setMouseIsPressed] = useState<boolean>(false);
   const cursorPositionRef = useRef<Position>(null);
   cursorPositionRef.current = cursorPosition;
   const isDrawingRef = useRef<boolean>(null);
   isDrawingRef.current = isDrawing;
-  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [textBlocks, setTextBlocks] = useState<TextBlock[]>([]);
+  const textBlocksRef = useRef<TextBlock[]>(null);
+  textBlocksRef.current = textBlocks;
+  const [currentBlockId, setCurrentBlockId] = useState<string>(null);
+  const [currentBlock, setCurrentBlock] = useState<TextBlock>(null);
+  const currentBlockRef = useRef<TextBlock>(null);
+  currentBlockRef.current = currentBlock;
+  const [shiftKeyCount, setShiftKeyCount] = useState(0);
+  const shiftKeyCountRef = useRef<number>(null);
+  shiftKeyCountRef.current = shiftKeyCount;
+  const [isSelectingBlock, setIsSelectingBlock] = useState<boolean>(false);
+  const isSelectingBlockRef = useRef<boolean>(null);
+  isSelectingBlockRef.current = isSelectingBlock;
+
+  // useEffect(() => {
+  //   if (shiftKeyCountRef.current < 2) {
+  //     const blockCursor = document.getElementById('block-cursor');
+  //     setTimeout(() => {
+  //       if (shiftKeyCountRef.current === 2) {
+  //         if (blockCursor.style.display === 'none') {
+  //           blockCursor.style.display = 'block';
+  //         } else {
+  //           blockCursor.style.display = 'none';
+  //         }
+  //       }
+  //       setShiftKeyCount(0);
+  //     }, 200);
+  //   }
+  // }, [shiftKeyCount]);
+
+  useEffect(() => {
+    const blockCursor = document.getElementById('block-cursor');
+    const cursor = document.getElementById('cursor');
+    if (blockCursor.style.display === 'none') {
+      blockCursor.style.display = 'block';
+      cursor.style.display = 'none';
+      blockCursor.focus();
+    } else {
+      blockCursor.style.display = 'none';
+      cursor.style.display = 'block';
+      cursor.focus();
+    }
+  }, [isSelectingBlock]);
 
   useEffect(() => {
     document.addEventListener('keydown', (e) => {
@@ -44,6 +91,189 @@ const IndexPage = () => {
       if (e.metaKey) {
         if (key === 68) {
           setIsDrawing((value) => !value);
+        }
+      }
+
+      // When shift key is pressed twice, enter Block Select mode
+      if (!isDrawingRef.current) {
+        if (e.shiftKey) {
+          // setShiftKeyCount((shiftKeyCount) => shiftKeyCount + 1);
+          setIsSelectingBlock((value) => !value);
+        }
+      }
+
+      if (isSelectingBlockRef.current) {
+        switch (key) {
+          case 9:
+            const nextTextBlock = getNextTextBlock(textBlocksRef.current, currentBlockRef.current);
+            setCurrentBlock(nextTextBlock);
+            break;
+          case 8 || 46: // Backspace or Delete
+            // Delete current block
+            break;
+          case 37: // ArrowLeft
+            if (currentBlockRef.current.position.col > 0) {
+              // move block content to left
+              for (let row = 0; row < currentBlockRef.current.height; row++) {
+                for (let col = 0; col < currentBlockRef.current.width; col++) {
+                  const prev = document.getElementById(
+                    `cell-${currentBlockRef.current.position.row + row}-${
+                      currentBlockRef.current.position.col + col
+                    }`,
+                  ) as HTMLTextAreaElement;
+                  const next = document.getElementById(
+                    `cell-${currentBlockRef.current.position.row + row}-${
+                      currentBlockRef.current.position.col + col - 1
+                    }`,
+                  ) as HTMLTextAreaElement;
+                  next.value = prev.value;
+                  prev.value = '';
+                }
+              }
+              setCurrentBlock((prev) => {
+                return {
+                  ...prev,
+                  position: { row: prev.position.row, col: prev.position.col - 1 },
+                };
+              });
+              setTextBlocks(
+                textBlocksRef.current.map((block) =>
+                  block.blockId === currentBlockRef.current.blockId
+                    ? {
+                        ...block,
+                        position: {
+                          row: block.position.row,
+                          col: block.position.col - 1,
+                        },
+                      }
+                    : block,
+                ),
+              );
+            }
+            break;
+          case 38: // ArrowUp
+            if (currentBlockRef.current.position.row > 0) {
+              // move block content to above
+              for (let row = 0; row < currentBlockRef.current.height; row++) {
+                for (let col = 0; col < currentBlockRef.current.width; col++) {
+                  const prev = document.getElementById(
+                    `cell-${currentBlockRef.current.position.row + row}-${
+                      currentBlockRef.current.position.col + col
+                    }`,
+                  ) as HTMLTextAreaElement;
+                  const next = document.getElementById(
+                    `cell-${currentBlockRef.current.position.row + row - 1}-${
+                      currentBlockRef.current.position.col + col
+                    }`,
+                  ) as HTMLTextAreaElement;
+                  next.value = prev.value;
+                  prev.value = '';
+                }
+              }
+              setCurrentBlock((prev) => {
+                return {
+                  ...prev,
+                  position: { row: prev.position.row - 1, col: prev.position.col },
+                };
+              });
+              setTextBlocks(
+                textBlocksRef.current.map((block) =>
+                  block.blockId === currentBlockRef.current.blockId
+                    ? {
+                        ...block,
+                        position: {
+                          row: block.position.row - 1,
+                          col: block.position.col,
+                        },
+                      }
+                    : block,
+                ),
+              );
+            }
+            break;
+          case 39: // ArrowRight
+            if (currentBlockRef.current.position.col + currentBlockRef.current.width < maxCol) {
+              // move block content to right
+              for (let row = 0; row < currentBlockRef.current.height; row++) {
+                for (let col = currentBlockRef.current.width - 1; col >= 0; col--) {
+                  const prev = document.getElementById(
+                    `cell-${currentBlockRef.current.position.row + row}-${
+                      currentBlockRef.current.position.col + col
+                    }`,
+                  ) as HTMLTextAreaElement;
+                  const next = document.getElementById(
+                    `cell-${currentBlockRef.current.position.row + row}-${
+                      currentBlockRef.current.position.col + col + 1
+                    }`,
+                  ) as HTMLTextAreaElement;
+                  console.log(currentBlockRef.current.position.col + col + 1);
+                  next.value = prev.value;
+                  prev.value = '';
+                }
+              }
+              setCurrentBlock((prev) => {
+                return {
+                  ...prev,
+                  position: { row: prev.position.row, col: prev.position.col + 1 },
+                };
+              });
+              setTextBlocks(
+                textBlocksRef.current.map((block) =>
+                  block.blockId === currentBlockRef.current.blockId
+                    ? {
+                        ...block,
+                        position: {
+                          row: block.position.row,
+                          col: block.position.col + 1,
+                        },
+                      }
+                    : block,
+                ),
+              );
+            }
+            break;
+          case 40: // ArrowDown
+            if (currentBlockRef.current.position.row + currentBlockRef.current.height < maxRow) {
+              // move block content to below
+              for (let row = currentBlockRef.current.height - 1; row >= 0; row--) {
+                for (let col = 0; col < currentBlockRef.current.width; col++) {
+                  const prev = document.getElementById(
+                    `cell-${currentBlockRef.current.position.row + row}-${
+                      currentBlockRef.current.position.col + col
+                    }`,
+                  ) as HTMLTextAreaElement;
+                  const next = document.getElementById(
+                    `cell-${currentBlockRef.current.position.row + row + 1}-${
+                      currentBlockRef.current.position.col + col
+                    }`,
+                  ) as HTMLTextAreaElement;
+                  next.value = prev.value;
+                  prev.value = '';
+                }
+              }
+              setCurrentBlock((prev) => {
+                return {
+                  ...prev,
+                  position: { row: prev.position.row + 1, col: prev.position.col },
+                };
+              });
+              setTextBlocks(
+                textBlocksRef.current.map((block) =>
+                  block.blockId === currentBlockRef.current.blockId
+                    ? {
+                        ...block,
+                        position: {
+                          row: block.position.row + 1,
+                          col: block.position.col,
+                        },
+                      }
+                    : block,
+                ),
+              );
+            }
+            break;
+          default:
+            return;
         }
       }
 
@@ -148,6 +378,20 @@ const IndexPage = () => {
             isDrawing={isDrawing}
             mouseIsPressed={mouseIsPressed}
             setMouseIsPressed={setMouseIsPressed}
+            textBlocks={textBlocks}
+            setTextBlocks={setTextBlocks}
+            currentBlock={currentBlock}
+            setCurrentBlock={setCurrentBlock}
+          />
+          <BlockCursor
+            cellLength={cellLength}
+            maxRow={maxRow}
+            maxCol={maxCol}
+            blockCursorPosition={blockCursorPosition}
+            setBlockCursorPosition={setBlockCursorPosition}
+            textBlocks={textBlocks}
+            currentBlock={currentBlock}
+            setCurrentBlock={setCurrentBlock}
           />
           {grid.map((row, rowIdx) => {
             return (
@@ -164,6 +408,10 @@ const IndexPage = () => {
                       isDrawing={isDrawing}
                       mouseIsPressed={mouseIsPressed}
                       setMouseIsPressed={setMouseIsPressed}
+                      textBlocks={textBlocks}
+                      setTextBlocks={setTextBlocks}
+                      currentBlock={currentBlock}
+                      setCurrentBlock={setCurrentBlock}
                     />
                   );
                 })}
